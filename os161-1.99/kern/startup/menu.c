@@ -274,6 +274,34 @@ cmd_panic(int nargs, char **args)
 }
 
 /*
+ * Command to enable the output of debugging messages of type DB_THREADS.
+ * (If such messages are already enabled, the command should have no effect.)
+ * Thus, any kernel commands that are run after 'dth' should run with DB_THREADS
+ * debugging messages enabled.
+ */
+ static
+ int
+ cmd_dth(int nargs, char **args)
+ {
+ 	// Not sure why I added this in here, most likely not needed now.
+ 	//DEBUG(DB_VM, "VM free pages: %u\n", free_pages);
+ 	//DEBUG(DB_THREADS, "DEBUG ENABLED %u\n", free_pages);
+
+ 	 (void)nargs; // these are void meaning we won't be using them (right?)
+ 	 (void)args;
+ 	 // Looking at lib.h lines 79-91, you can see all the various debug definitions
+ 	 // For this function cmd_dth, we want to debug threads. Currently the dbflags
+ 	 // variable is set to 0, meaning off or disabled.  To enable, we use the
+ 	 // 'extern' variable (a variable outside function block) of the dbflags and
+ 	 // set it to the definition that we want (i.e. DB_THREADS)
+ 	 extern uint32_t dbflags;
+ 	 dbflags = 0x0010; // Setting the dbflags external variable to DB_THREADS
+ 	 kprintf("External variable 'dbflags' set to: %d\n", dbflags); // print dbflags variable
+ 	 kprintf("DEBUGGING MESSAGES ENABLED - TYPE: DB_THREADS\n");
+ 	 return 0;
+ }
+
+/*
  * Command for shutting down.
  */
 static
@@ -436,6 +464,7 @@ static const char *opsmenu[] = {
 	"[pwd]     Print current directory   ",
 	"[sync]    Sync filesystems          ",
 	"[panic]   Intentional panic         ",
+	"[dth]     Enable debugging messages ",
 	"[q]       Quit and shut down        ",
 	NULL
 };
@@ -545,6 +574,7 @@ static struct {
 	{ "pwd",	cmd_pwd },
 	{ "sync",	cmd_sync },
 	{ "panic",	cmd_panic },
+	{ "dth",    cmd_dth },
 	{ "q",		cmd_quit },
 	{ "exit",	cmd_quit },
 	{ "halt",	cmd_quit },
